@@ -1,0 +1,23 @@
+name: Windows CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: seanmiddleditch/gha-setup-ninja@master
+      
+      - name: Build the project
+        run: .\scripts\build.bat
+        shell: pwsh
+      
+      - name: Run the tests
+        run: .\scripts\run-tests.bat
+        shell: pwsh

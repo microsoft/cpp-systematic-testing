@@ -1,0 +1,23 @@
+name: Linux CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: seanmiddleditch/gha-setup-ninja@master
+
+      - name: Build the project
+        run: ./scripts/build.sh
+        shell: bash
+      
+      - name: Run the tests
+        run: ./scripts/run-tests.sh
+        shell: bash
