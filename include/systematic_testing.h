@@ -5,7 +5,9 @@
 #define SYSTEMATIC_TESTING_H
 
 #include <algorithm>
+#include <atomic>
 #include <chrono>
+#include <cmath>
 #include <condition_variable>
 #include <functional>
 #include <iostream>
@@ -20,27 +22,25 @@
 #include <thread>
 #include <tuple>
 #include <vector>
-#include <cmath>
-#include <atomic>
 
 #ifdef __linux__
-    #ifdef SYSTEST_EXPORT
-    #   define SYSTEST_API __attribute__((visibility("default")))
-    #else
-    #   define SYSTEST_API 
-    #endif
+#   ifdef SYSTEST_EXPORT
+#      define SYSTEST_API __attribute__((visibility("default")))
+#   else
+#      define SYSTEST_API 
+#   endif
 #elif _WIN32
-    #ifdef SYSTEST_EXPORT
-    #   define SYSTEST_API __declspec(dllexport)
-    #else
-    #   define SYSTEST_API __declspec(dllimport)
-    #endif
+#   ifdef SYSTEST_EXPORT
+#      define SYSTEST_API __declspec(dllexport)
+#   else
+#      define SYSTEST_API __declspec(dllimport)
+#   endif
 #else 
-    #ifdef SYSTEST_EXPORT
-    #   define SYSTEST_API 
-    #else
-    #   define SYSTEST_API 
-    #endif
+#   ifdef SYSTEST_EXPORT
+#      define SYSTEST_API 
+#   else
+#      define SYSTEST_API 
+#   endif
 #endif
 
 namespace SystematicTesting
@@ -341,7 +341,7 @@ namespace SystematicTesting
         // Returns the average number of scheduling decisions per iteration.
         size_t avg_scheduling_decisions() const noexcept
         {
-            return m_iterations > 0 ? (size_t) round(m_scheduling_decisions / m_iterations) : 0;
+            return m_iterations > 0 ? (size_t) std::round(m_scheduling_decisions / m_iterations) : 0;
         }
 
         // Returns the total number of controlled operations.
@@ -353,7 +353,7 @@ namespace SystematicTesting
         // Returns the average number of controlled operations per iteration.
         size_t avg_controlled_operations() const noexcept
         {
-            return m_iterations > 0 ? (size_t) round(m_operations / m_iterations) : 0;
+            return m_iterations > 0 ? (size_t) std::round(m_operations / m_iterations) : 0;
         }
 
         // Returns the number of unique controlled operation creation sequences.
@@ -378,7 +378,7 @@ namespace SystematicTesting
         // Returns the average number of controlled resources per iteration.
         size_t avg_controlled_resources() const noexcept
         {
-            return m_iterations > 0 ? (size_t) round(m_resources / m_iterations) : 0;
+            return m_iterations > 0 ? (size_t) std::round(m_resources / m_iterations) : 0;
         }
 
         // Returns the max number of synchronization resources that were controlled
@@ -397,7 +397,7 @@ namespace SystematicTesting
         // Returns the average number of uncontrolled threads per iteration.
         size_t avg_uncontrolled_threads() const noexcept
         {
-            return m_iterations > 0 ? (size_t) round(m_uncontrolled_threads / m_iterations) : 0;
+            return m_iterations > 0 ? (size_t) std::round(m_uncontrolled_threads / m_iterations) : 0;
         }
 
         // Returns the total number of detached threads.
@@ -428,7 +428,7 @@ namespace SystematicTesting
         // Returns the average test duration in milliseconds per iteration.
         size_t avg_elapsed_time() const noexcept
         {
-            return m_iterations > 0 ? (size_t) round(m_elapsed_test_time / m_iterations) : 0;
+            return m_iterations > 0 ? (size_t) std::round(m_elapsed_test_time / m_iterations) : 0;
         }
 
         // Returns the total unattached duration in milliseconds across all iterations.
@@ -440,7 +440,7 @@ namespace SystematicTesting
         // Returns the average unattached duration in milliseconds per iteration.
         size_t avg_elapsed_unattached_time() const noexcept
         {
-            return m_iterations > 0 ? (size_t) round(m_elapsed_unattached_time / m_iterations) : 0;
+            return m_iterations > 0 ? (size_t) std::round(m_elapsed_unattached_time / m_iterations) : 0;
         }
 
         // Returns a string containing exploration statistics and coverage metrics.
