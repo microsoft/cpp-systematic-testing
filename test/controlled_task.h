@@ -15,60 +15,57 @@
 using namespace std::chrono_literals;
 using namespace SystematicTesting;
 
-namespace
+template<typename ResultType>
+class ControlledTaskBase
 {
-    template<typename ResultType>
-    class ControlledTaskBase
+public:
+    explicit ControlledTaskBase(std::function<ResultType()> func) :
+        m_test_engine(GetTestEngine()),
+        m_thread(),
+        m_func(func),
+        m_result(std::nullopt)
     {
-    public:
-        explicit ControlledTaskBase(std::function<ResultType()> func) :
-            m_test_engine(GetTestEngine()),
-            m_thread(),
-            m_func(func),
-            m_result(std::nullopt)
+        
+    }
+
+    virtual ~ControlledTaskBase()
+    {
+        if (m_thread->joinable())
         {
-            
+            m_thread->join();
         }
+    }
 
-        virtual ~ControlledTaskBase()
+    void start()
+    {
+        size_t op_id = m_test_engine->create_next_operation().value();
+        m_thread = std::make_unique<std::thread>([this, op_id]()
         {
-            if (m_thread->joinable())
-            {
-                m_thread->join();
-            }
-        }
+            m_test_engine->start_operation(op_id);
+            execute(m_func, op_id);
+            m_test_engine->complete_current_operation();
+        });
 
-        void start()
-        {
-            size_t op_id = m_test_engine->create_next_operation().value();
-            m_thread = std::make_unique<std::thread>([this, op_id]()
-            {
-                m_test_engine->start_operation(op_id);
-                execute(m_func, op_id);
-                m_test_engine->complete_current_operation();
-            });
+        m_test_engine->schedule_next_operation();
+    }
 
-            m_test_engine->schedule_next_operation();
-        }
+    void wait()
+    {
+        m_test_engine->pause_operation_until_condition([this]() {
+            return m_result.has_value();
+        });
+    }
 
-        void wait()
-        {
-            m_test_engine->pause_operation_until_condition([this]() {
-                return m_result.has_value();
-            });
-        }
+protected:
+    std::optional<std::any> m_result;
 
-    protected:
-        std::optional<std::any> m_result;
+    virtual void execute(std::function<ResultType()>& func, size_t op_id) = 0;
 
-        virtual void execute(std::function<ResultType()>& func, size_t op_id) = 0;
-
-    private:
-        TestEngine* m_test_engine;
-        std::unique_ptr<std::thread> m_thread;
-        std::function<ResultType()> m_func;
-    };
-}
+private:
+    TestEngine* m_test_engine;
+    std::unique_ptr<std::thread> m_thread;
+    std::function<ResultType()> m_func;
+};
 
 template<typename ResultType>
 class ControlledTask final : public ControlledTaskBase<ResultType>

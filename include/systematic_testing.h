@@ -5,7 +5,9 @@
 #define SYSTEMATIC_TESTING_H
 
 #include <algorithm>
+#include <atomic>
 #include <chrono>
+#include <cmath>
 #include <condition_variable>
 #include <functional>
 #include <iostream>
@@ -21,10 +23,24 @@
 #include <tuple>
 #include <vector>
 
-#ifdef SYSTEST_EXPORT
-#   define SYSTEST_API __declspec(dllexport)
-#else
-#   define SYSTEST_API __declspec(dllimport)
+#ifdef __linux__
+#   ifdef SYSTEST_EXPORT
+#      define SYSTEST_API __attribute__((visibility("default")))
+#   else
+#      define SYSTEST_API 
+#   endif
+#elif _WIN32
+#   ifdef SYSTEST_EXPORT
+#      define SYSTEST_API __declspec(dllexport)
+#   else
+#      define SYSTEST_API __declspec(dllimport)
+#   endif
+#else 
+#   ifdef SYSTEST_EXPORT
+#      define SYSTEST_API 
+#   else
+#      define SYSTEST_API 
+#   endif
 #endif
 
 namespace SystematicTesting
@@ -289,7 +305,7 @@ namespace SystematicTesting
     {
     private:
         // Give private access to the test engine.
-        friend class TestEngine;
+        friend class SystematicTesting::TestEngine;
 
     public:
         // Returns the number of iterations performed.
@@ -666,7 +682,7 @@ namespace SystematicTesting
         {
         private:
             // Give private access to the test engine.
-            friend class TestEngine;
+            friend class SystematicTesting::TestEngine;
 
             // The creation sequence vector of this operation.
             std::vector<size_t> m_creation_seq;
